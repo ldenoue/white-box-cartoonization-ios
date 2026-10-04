@@ -15,11 +15,12 @@ The same source builds as an iOS/iPadOS app and a sandboxed macOS app. All frame
 ## What is included
 
 - `Models/WhiteBoxCartoonization256.mlpackage`: 256 × 256 FP16 ML Program with RGB `CVPixelBuffer` input and output.
+- `Models/WhiteBoxCartoonization384.mlpackage`: higher-detail 384 × 384 variant using the same weights.
 - `Sources/`: shared camera, Photos video playback, center-crop, Core ML inference, and SwiftUI UI.
 - `scripts/convert_coreml.py`: reproducible ONNX → PyTorch → Core ML conversion with ONNX Runtime parity validation.
 - `project.yml`: XcodeGen source for the checked-in Xcode project.
 
-The conversion folds the browser pipeline's RGB↔BGR channel swap, `[-1, 1]` normalization, and output denormalization into the model. It also implements ONNX's asymmetric bilinear resize exactly; using PyTorch's default half-pixel resize changes the result substantially.
+The conversion folds the browser pipeline's RGB↔BGR channel swap, `[-1, 1]` normalization, and output denormalization into the model. It also implements ONNX's asymmetric bilinear resize exactly; using PyTorch's default half-pixel resize changes the result substantially. The app's resolution picker loads the matching fixed-shape model, with 256 × 256 as the real-time default and 384 × 384 as the detailed option.
 
 ## Run
 
@@ -41,6 +42,9 @@ Python 3.10 was used because the conversion stack does not yet support every new
 .venv/bin/python scripts/convert_coreml.py \
   /Users/ldenoue/Documents/ChatGPT/animeganv3-browser/public/models/WhiteBox_Cartoonization.onnx \
   Models/WhiteBoxCartoonization256.mlpackage
+.venv/bin/python scripts/convert_coreml.py \
+  /Users/ldenoue/Documents/ChatGPT/animeganv3-browser/public/models/WhiteBox_Cartoonization.onnx \
+  Models/WhiteBoxCartoonization384.mlpackage --size 384
 ```
 
 The converter first checks its PyTorch wrapper against the source ONNX graph. The checked-in conversion had a maximum pre-FP16 difference of `0.000374`. After Core ML FP16 lowering, a deterministic random-image check measured mean absolute pixel error `0.317`, p99 `1.033`, and maximum `3.195` on a 0–255 scale.
@@ -52,6 +56,8 @@ On an Apple M4 MacBook Air, 20 warmed direct Core ML predictions at 256 × 256 m
 - median 22.72 ms (44.0 predictions/s)
 - mean 22.82 ms
 - p95 23.43 ms
+
+The 384 × 384 variant measured 54.58 ms median (18.3 predictions/s), 54.86 ms mean, and 56.48 ms p95 on the same Mac. It processes 2.25 times as many pixels as the 256 model.
 
 This is model-only throughput from Python. The app's live counters are the useful numbers for a particular Mac or iPhone because they include model scheduling and actual frame cadence. The app uses `.all` compute units so Core ML can choose CPU, GPU, or Neural Engine partitions.
 

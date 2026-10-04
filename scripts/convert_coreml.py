@@ -110,7 +110,7 @@ def main() -> None:
         outputs=[ct.ImageType(name="cartoon", color_layout=ct.colorlayout.RGB)],
     )
     model.author = "Converted from SystemErrorWang/White-box-Cartoonization model-33999"
-    model.short_description = "White-box image cartoonization at 256 × 256"
+    model.short_description = f"White-box image cartoonization at {args.size} × {args.size}"
     model.input_description["source"] = "Square RGB source image"
     model.output_description["cartoon"] = "Square RGB cartoonized image"
     model.user_defined_metadata["source_repository"] = "https://github.com/SystemErrorWang/White-box-Cartoonization"

@@ -13,12 +13,15 @@ final class Cartoonizer: @unchecked Sendable {
     private let model: MLModel
     private let context = CIContext(options: [.cacheIntermediates: false])
     private let personSegmentationRequest: VNGeneratePersonSegmentationRequest
+    private let inputSize: CGFloat
     private var inputBuffer: CVPixelBuffer
 
-    init() throws {
-        guard let modelURL = Bundle.main.url(forResource: "WhiteBoxCartoonization256", withExtension: "mlmodelc") else {
-            throw CocoaError(.fileNoSuchFile, userInfo: [NSLocalizedDescriptionKey: "WhiteBoxCartoonization256.mlmodelc is missing from the app bundle."])
+    init(inputSize: Int) throws {
+        let modelName = "WhiteBoxCartoonization\(inputSize)"
+        guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc") else {
+            throw CocoaError(.fileNoSuchFile, userInfo: [NSLocalizedDescriptionKey: "\(modelName).mlmodelc is missing from the app bundle."])
         }
+        self.inputSize = CGFloat(inputSize)
         let configuration = MLModelConfiguration()
         configuration.computeUnits = .all
         configuration.allowLowPrecisionAccumulationOnGPU = true
@@ -26,7 +29,7 @@ final class Cartoonizer: @unchecked Sendable {
         personSegmentationRequest = VNGeneratePersonSegmentationRequest()
         personSegmentationRequest.qualityLevel = .fast
         personSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
-        inputBuffer = try Self.makePixelBuffer()
+        inputBuffer = try Self.makePixelBuffer(size: inputSize)
     }
 
     func predict(_ source: CVPixelBuffer, applyingPersonSegmentation: Bool) throws -> Result {
@@ -38,11 +41,16 @@ final class Cartoonizer: @unchecked Sendable {
         let extent = sourceImage.extent
         let side = min(extent.width, extent.height)
         let crop = CGRect(x: extent.midX - side / 2, y: extent.midY - side / 2, width: side, height: side)
-        let scale = CGFloat(256) / side
+        let scale = inputSize / side
         let prepared = sourceImage.cropped(to: crop)
             .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
             .transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-        context.render(prepared, to: inputBuffer, bounds: CGRect(x: 0, y: 0, width: 256, height: 256), colorSpace: CGColorSpaceCreateDeviceRGB())
+        context.render(
+            prepared,
+            to: inputBuffer,
+            bounds: CGRect(x: 0, y: 0, width: inputSize, height: inputSize),
+            colorSpace: CGColorSpaceCreateDeviceRGB()
+        )
 
         let modelStarted = ContinuousClock.now
         let provider = try MLDictionaryFeatureProvider(dictionary: ["source": MLFeatureValue(pixelBuffer: inputBuffer)])
@@ -82,7 +90,7 @@ final class Cartoonizer: @unchecked Sendable {
         ])
     }
 
-    private static func makePixelBuffer() throws -> CVPixelBuffer {
+    private static func makePixelBuffer(size: Int) throws -> CVPixelBuffer {
         var buffer: CVPixelBuffer?
         let attributes: [CFString: Any] = [
             kCVPixelBufferCGImageCompatibilityKey: true,
@@ -90,7 +98,14 @@ final class Cartoonizer: @unchecked Sendable {
             kCVPixelBufferMetalCompatibilityKey: true,
             kCVPixelBufferIOSurfacePropertiesKey: [:]
         ]
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, 256, 256, kCVPixelFormatType_32BGRA, attributes as CFDictionary, &buffer)
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            size,
+            size,
+            kCVPixelFormatType_32BGRA,
+            attributes as CFDictionary,
+            &buffer
+        )
         guard status == kCVReturnSuccess, let buffer else {
             throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
         }

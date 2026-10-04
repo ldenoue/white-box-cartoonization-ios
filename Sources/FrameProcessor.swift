@@ -9,6 +9,7 @@ final class FrameProcessor: ObservableObject {
     @Published var throughputFPS = 0.0
     @Published var errorMessage: String?
     @Published var usesPersonSegmentation = false
+    @Published var inputSize = 256
 
     private let worker = InferenceWorker()
     private var processing = false
@@ -17,7 +18,11 @@ final class FrameProcessor: ObservableObject {
     func submit(_ pixelBuffer: CVPixelBuffer) {
         guard !processing else { return }
         processing = true
-        worker.submit(pixelBuffer, applyingPersonSegmentation: usesPersonSegmentation) { [weak self] result in
+        worker.submit(
+            pixelBuffer,
+            inputSize: inputSize,
+            applyingPersonSegmentation: usesPersonSegmentation
+        ) { [weak self] result in
             Task { @MainActor in
                 guard let self else { return }
                 switch result {
@@ -52,18 +57,19 @@ private final class InferenceWorker: @unchecked Sendable {
     }
 
     private let queue = DispatchQueue(label: "WhiteBoxCartoonization.inference", qos: .userInitiated)
-    private var cartoonizer: Cartoonizer?
+    private var cartoonizers: [Int: Cartoonizer] = [:]
 
     func submit(
         _ pixelBuffer: CVPixelBuffer,
+        inputSize: Int,
         applyingPersonSegmentation: Bool,
         completion: @escaping @Sendable (Result<Cartoonizer.Result, Error>) -> Void
     ) {
         let box = PixelBufferBox(pixelBuffer)
         queue.async { [self, box] in
             do {
-                let engine = try cartoonizer ?? Cartoonizer()
-                cartoonizer = engine
+                let engine = try cartoonizers[inputSize] ?? Cartoonizer(inputSize: inputSize)
+                cartoonizers[inputSize] = engine
                 completion(.success(try engine.predict(
                     box.value,
                     applyingPersonSegmentation: applyingPersonSegmentation

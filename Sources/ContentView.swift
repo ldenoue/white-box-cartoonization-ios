@@ -26,6 +26,13 @@ struct ContentView: View {
             .pickerStyle(.segmented)
             .frame(maxWidth: 420)
 
+            Picker("Resolution", selection: $processor.inputSize) {
+                Text("256 × 256 · Fast").tag(256)
+                Text("384 × 384 · Detailed").tag(384)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 420)
+
             Toggle(isOn: $processor.usesPersonSegmentation) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Person on green screen")
@@ -55,7 +62,7 @@ struct ContentView: View {
             HStack(spacing: 18) {
                 Label(String(format: "%.1f ms pipeline", processor.pipelineLatencyMS), systemImage: "gauge.with.dots.needle.67percent")
                 Label(String(format: "%.1f FPS", processor.throughputFPS), systemImage: "speedometer")
-                Text(String(format: "Core ML %.1f ms", processor.modelLatencyMS))
+                Text(String(format: "%d² · Core ML %.1f ms", processor.inputSize, processor.modelLatencyMS))
                     .foregroundStyle(.secondary)
             }
             .font(.callout.monospacedDigit())
