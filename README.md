@@ -4,6 +4,12 @@ A native SwiftUI test bench for the White-box Cartoonization model used by the s
 
 The optional **Person on green screen** toggle first runs Apple's on-device Vision person-segmentation model, composites the detected person over pure green, and feeds that result to White-box Cartoonization. The UI reports both total pipeline latency and Core ML model latency so the segmentation cost is visible on each device.
 
+## Examples
+
+| White-box camera | Vision person segmentation + green screen |
+| --- | --- |
+| <img src="Assets/white-box-camera.jpg" alt="Live camera cartoonized with the White-box Core ML model" width="360"> | <img src="Assets/white-box-green-screen.jpg" alt="Cartoonized person composited over a green background using Apple Vision segmentation" width="360"> |
+
 The same source builds as an iOS/iPadOS app and a sandboxed macOS app. All frames remain on-device.
 
 ## What is included
