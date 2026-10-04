@@ -15,7 +15,9 @@
 		520C00A2979E237506D8D753 /* FrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACE5F7AE5FDED805F1BA079 /* FrameProcessor.swift */; };
 		6267FBFCBA32D71FD56F6E93 /* WhiteBoxCartoonization384.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 965B8C45852CC4DB1B883DC6 /* WhiteBoxCartoonization384.mlpackage */; };
 		6E3E55659556AFA3DFEF04FB /* FrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACE5F7AE5FDED805F1BA079 /* FrameProcessor.swift */; };
+		7C7286485E23503F6439E964 /* SongPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */; };
 		7FD91D11709DD0ABBB805EEA /* WhiteBoxCartoonizationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */; };
+		8C3A63DFAD2DC2E3F76421EC /* SongPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */; };
 		8C41D4584981A47C62EB8E2F /* WhiteBoxCartoonization256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */; };
 		92291666BAE4BD677446BB1B /* VideoPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7326849B71B8B723D4548F22 /* VideoPlayback.swift */; };
 		9F813DAFC6BAD35EADE5593E /* WhiteBoxCartoonization256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */; };
@@ -26,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPreviewPlayer.swift; sourceTree = "<group>"; };
 		7326849B71B8B723D4548F22 /* VideoPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayback.swift; sourceTree = "<group>"; };
 		780905222D62CDEF498EDD10 /* Cartoonizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartoonizer.swift; sourceTree = "<group>"; };
 		7DA12CDAD398C7568FFAE72C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -46,6 +49,7 @@
 				780905222D62CDEF498EDD10 /* Cartoonizer.swift */,
 				7DA12CDAD398C7568FFAE72C /* ContentView.swift */,
 				DACE5F7AE5FDED805F1BA079 /* FrameProcessor.swift */,
+				24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */,
 				7326849B71B8B723D4548F22 /* VideoPlayback.swift */,
 				BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */,
 			);
@@ -164,6 +168,7 @@
 				1E07DE073CA0A9A314088AFF /* Cartoonizer.swift in Sources */,
 				0BE9F435E02384BBCD611442 /* ContentView.swift in Sources */,
 				520C00A2979E237506D8D753 /* FrameProcessor.swift in Sources */,
+				7C7286485E23503F6439E964 /* SongPreviewPlayer.swift in Sources */,
 				92291666BAE4BD677446BB1B /* VideoPlayback.swift in Sources */,
 				9F813DAFC6BAD35EADE5593E /* WhiteBoxCartoonization256.mlpackage in Sources */,
 				6267FBFCBA32D71FD56F6E93 /* WhiteBoxCartoonization384.mlpackage in Sources */,
@@ -179,6 +184,7 @@
 				A0B89A099F1E0F040F02DE6C /* Cartoonizer.swift in Sources */,
 				1DC7C6ACE6D110F2AE6670A1 /* ContentView.swift in Sources */,
 				6E3E55659556AFA3DFEF04FB /* FrameProcessor.swift in Sources */,
+				8C3A63DFAD2DC2E3F76421EC /* SongPreviewPlayer.swift in Sources */,
 				E15EF6C421E64DEDB9364EE9 /* VideoPlayback.swift in Sources */,
 				8C41D4584981A47C62EB8E2F /* WhiteBoxCartoonization256.mlpackage in Sources */,
 				2AECE499C8BA0684B66763DB /* WhiteBoxCartoonization384.mlpackage in Sources */,

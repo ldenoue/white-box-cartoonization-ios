@@ -47,3 +47,29 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: Cartoonize the live camera entirely on this Mac.
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: Choose a video to cartoonize entirely on this Mac.
         CODE_SIGN_ENTITLEMENTS: WhiteBoxCartoonization.entitlements
+
+schemes:
+  WhiteBoxCartoonization-iOS:
+    build:
+      targets:
+        WhiteBoxCartoonization-iOS: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+  WhiteBoxCartoonization-macOS:
+    build:
+      targets:
+        WhiteBoxCartoonization-macOS: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

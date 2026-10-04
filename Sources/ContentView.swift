@@ -12,6 +12,7 @@ struct ContentView: View {
     @StateObject private var processor = FrameProcessor()
     @StateObject private var camera = CameraCapture()
     @StateObject private var playback = VideoPlayback()
+    @StateObject private var songPreview = SongPreviewPlayer()
     @State private var source = InputSource.camera
     @State private var pickedItem: PhotosPickerItem?
     @State private var isVideoPickerPresented = false
@@ -51,6 +52,49 @@ struct ContentView: View {
                     Text("Apple Vision segmentation runs before cartoonization")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: 420)
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    TextField("Song or artist", text: $songPreview.query)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit { songPreview.searchAndPlay() }
+                    Button {
+                        songPreview.searchAndPlay()
+                    } label: {
+                        if songPreview.isSearching {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Label("Play first result", systemImage: "magnifyingglass")
+                        }
+                    }
+                    .disabled(songPreview.isSearching)
+                }
+                if let track = songPreview.track {
+                    HStack(spacing: 8) {
+                        Button {
+                            songPreview.togglePlayback()
+                        } label: {
+                            Image(systemName: songPreview.isPlaying ? "pause.fill" : "play.fill")
+                        }
+                        .buttonStyle(.plain)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(track.name).lineLimit(1)
+                            Text(track.artist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                        Spacer()
+                        if let storeURL = track.storeURL {
+                            Link("View in iTunes", destination: storeURL)
+                                .font(.caption)
+                        }
+                    }
+                    Text("Preview provided courtesy of iTunes")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else if let error = songPreview.errorMessage {
+                    Text(error).font(.caption).foregroundStyle(.red)
                 }
             }
             .frame(maxWidth: 420)
@@ -119,6 +163,7 @@ struct ContentView: View {
         .onDisappear {
             camera.stop()
             playback.stop()
+            songPreview.stop()
         }
         .onChange(of: source) { _, newValue in
             if newValue == .camera {
