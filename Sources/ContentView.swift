@@ -14,16 +14,28 @@ struct ContentView: View {
     @StateObject private var playback = VideoPlayback()
     @State private var source = InputSource.camera
     @State private var pickedItem: PhotosPickerItem?
+    @State private var isVideoPickerPresented = false
 
     var body: some View {
         VStack(spacing: 16) {
             Text("White Box Cartoonization")
                 .font(.title2.bold())
 
-            Picker("Input", selection: $source) {
-                ForEach(InputSource.allCases) { Text($0.rawValue).tag($0) }
+            HStack(spacing: 2) {
+                ForEach(InputSource.allCases) { input in
+                    Button(input.rawValue) {
+                        select(input)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.body.weight(source == input ? .semibold : .regular))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(Color.primary.opacity(source == input ? 0.12 : 0), in: Capsule())
+                    .accessibilityAddTraits(source == input ? .isSelected : [])
+                }
             }
-            .pickerStyle(.segmented)
+            .padding(2)
+            .background(Color.secondary.opacity(0.14), in: Capsule())
             .frame(maxWidth: 420)
 
             Picker("Resolution", selection: $processor.inputSize) {
@@ -68,13 +80,14 @@ struct ContentView: View {
             .font(.callout.monospacedDigit())
 
             if source == .video {
-                HStack {
-                    PhotosPicker(selection: $pickedItem, matching: .videos) {
-                        Label("Choose Video", systemImage: "photo.on.rectangle")
-                    }
+                if playback.hasVideo {
                     Button(playback.isPlaying ? "Pause" : "Play") {
                         playback.isPlaying ? playback.pause() : playback.play()
                     }
+                } else {
+                    Text("Tap Video to choose a clip.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             } else {
                 Text("Camera frames never leave this device.")
@@ -88,6 +101,7 @@ struct ContentView: View {
         }
         .padding()
         .frame(minWidth: 360, minHeight: 560)
+        .photosPicker(isPresented: $isVideoPickerPresented, selection: $pickedItem, matching: .videos)
         .onAppear {
             wireInputs()
             camera.start()
@@ -115,6 +129,13 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    private func select(_ input: InputSource) {
+        source = input
+        guard input == .video else { return }
+        pickedItem = nil
+        isVideoPickerPresented = true
     }
 
     private func wireInputs() {
