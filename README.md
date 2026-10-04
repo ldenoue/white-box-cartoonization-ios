@@ -2,7 +2,7 @@
 
 A native SwiftUI test bench for the White-box Cartoonization model used by the sibling `animeganv3-browser` project. It runs a live camera or a video from Photos through an FP16 Core ML model, drops frames while inference is busy, and reports model latency plus observed output FPS.
 
-Tap the **Video** segment to choose a clip directly: iPhone and iPad open the system Photos picker, while macOS opens a Finder file chooser. Selected videos loop automatically and can be replaced by tapping the segment again.
+Tap the **Video** segment to choose a clip directly: iPhone and iPad open the system Photos picker, while macOS opens a Finder file chooser. Selected videos play muted, loop automatically, and can be replaced by tapping the segment again.
 
 Enter a song or artist in the preview search field to stream the first song result returned by Apple's iTunes Search API. The app shows the matched title and artist, provides play/pause and a store link, and does not download or save preview audio.
 

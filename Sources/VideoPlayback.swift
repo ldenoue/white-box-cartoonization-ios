@@ -20,6 +20,7 @@ final class VideoPlayback: ObservableObject {
         item.add(output)
         videoOutput = output
         player = AVPlayer(playerItem: item)
+        player?.isMuted = true
         player?.actionAtItemEnd = .pause
         endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
