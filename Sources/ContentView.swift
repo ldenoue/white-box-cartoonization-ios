@@ -101,7 +101,17 @@ struct ContentView: View {
         }
         .padding()
         .frame(minWidth: 360, minHeight: 560)
+        #if os(macOS)
+        .fileImporter(
+            isPresented: $isVideoPickerPresented,
+            allowedContentTypes: [.movie],
+            allowsMultipleSelection: false
+        ) { result in
+            importMacVideo(result)
+        }
+        #else
         .photosPicker(isPresented: $isVideoPickerPresented, selection: $pickedItem, matching: .videos)
+        #endif
         .onAppear {
             wireInputs()
             camera.start()
@@ -119,6 +129,7 @@ struct ContentView: View {
             }
         }
         .onChange(of: pickedItem) { _, item in
+            #if !os(macOS)
             guard let item else { return }
             Task {
                 do {
@@ -128,6 +139,7 @@ struct ContentView: View {
                     processor.errorMessage = error.localizedDescription
                 }
             }
+            #endif
         }
     }
 
@@ -136,6 +148,29 @@ struct ContentView: View {
         guard input == .video else { return }
         pickedItem = nil
         isVideoPickerPresented = true
+    }
+
+    #if os(macOS)
+    private func importMacVideo(_ result: Result<[URL], Error>) {
+        do {
+            guard let sourceURL = try result.get().first else { return }
+            let hasSecurityAccess = sourceURL.startAccessingSecurityScopedResource()
+            defer {
+                if hasSecurityAccess { sourceURL.stopAccessingSecurityScopedResource() }
+            }
+            playback.load(url: try Self.copyVideoToTemporaryDirectory(sourceURL))
+        } catch {
+            processor.errorMessage = error.localizedDescription
+        }
+    }
+    #endif
+
+    private static func copyVideoToTemporaryDirectory(_ sourceURL: URL) throws -> URL {
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(sourceURL.pathExtension.isEmpty ? "mov" : sourceURL.pathExtension)
+        try FileManager.default.copyItem(at: sourceURL, to: destination)
+        return destination
     }
 
     private func wireInputs() {
