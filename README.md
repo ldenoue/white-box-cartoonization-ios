@@ -4,7 +4,7 @@ A native SwiftUI test bench for the White-box Cartoonization model used by the s
 
 Tap the **Video** segment to choose a clip directly: iPhone and iPad open the system Photos picker, while macOS opens a Finder file chooser. Selected videos play muted, loop automatically, and can be replaced by tapping the segment again.
 
-Enter a song or artist in the preview search field to stream the first song result returned by Apple's iTunes Search API. The app shows the matched title and artist, provides play/pause and a store link, and does not download or save preview audio.
+Enter a song or artist in the preview search field to retrieve up to 10 previewable results from Apple's iTunes Search API. Choose a result from the menu to stream its preview on a loop. The app shows the selected title and artist, provides play/pause and a store link, and does not download or save preview audio.
 
 The optional **Person on green screen** toggle first runs Apple's on-device Vision person-segmentation model, composites the detected person over pure green, and feeds that result to White-box Cartoonization. The UI reports both total pipeline latency and Core ML model latency so the segmentation cost is visible on each device.
 

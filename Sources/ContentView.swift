@@ -60,17 +60,32 @@ struct ContentView: View {
                 HStack {
                     TextField("Song or artist", text: $songPreview.query)
                         .textFieldStyle(.roundedBorder)
-                        .onSubmit { songPreview.searchAndPlay() }
+                        .onSubmit { songPreview.search() }
                     Button {
-                        songPreview.searchAndPlay()
+                        songPreview.search()
                     } label: {
                         if songPreview.isSearching {
                             ProgressView().controlSize(.small)
                         } else {
-                            Label("Play first result", systemImage: "magnifyingglass")
+                            Label("Find songs", systemImage: "magnifyingglass")
                         }
                     }
                     .disabled(songPreview.isSearching)
+                }
+                if !songPreview.results.isEmpty {
+                    Picker(
+                        "Preview",
+                        selection: Binding(
+                            get: { songPreview.selectedTrackID },
+                            set: { songPreview.selectTrack(id: $0) }
+                        )
+                    ) {
+                        Text("Choose from \(songPreview.results.count) songs").tag(Int?.none)
+                        ForEach(songPreview.results) { result in
+                            Text("\(result.name) — \(result.artist)").tag(Optional(result.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
                 if let track = songPreview.track {
                     HStack(spacing: 8) {

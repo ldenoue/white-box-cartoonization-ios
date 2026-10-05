@@ -1,7 +1,8 @@
 import AVFoundation
 import Foundation
 
-struct SongPreviewTrack {
+struct SongPreviewTrack: Identifiable {
+    let id: Int
     let name: String
     let artist: String
     let previewURL: URL
@@ -11,6 +12,8 @@ struct SongPreviewTrack {
 @MainActor
 final class SongPreviewPlayer: ObservableObject {
     @Published var query = ""
+    @Published private(set) var results: [SongPreviewTrack] = []
+    @Published private(set) var selectedTrackID: Int?
     @Published private(set) var track: SongPreviewTrack?
     @Published private(set) var isSearching = false
     @Published private(set) var isPlaying = false
@@ -20,7 +23,7 @@ final class SongPreviewPlayer: ObservableObject {
     private var endObserver: NSObjectProtocol?
     private var searchTask: Task<Void, Never>?
 
-    func searchAndPlay() {
+    func search() {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else {
             errorMessage = "Enter a song or artist."
@@ -28,6 +31,8 @@ final class SongPreviewPlayer: ObservableObject {
         }
         searchTask?.cancel()
         stopPlayer()
+        results = []
+        selectedTrackID = nil
         track = nil
         searchTask = Task { [weak self] in
             guard let self else { return }
@@ -37,24 +42,39 @@ final class SongPreviewPlayer: ObservableObject {
             do {
                 let response = try await search(term: term)
                 try Task.checkCancellation()
-                guard let result = response.results.first else {
+                guard !response.results.isEmpty else {
                     throw SearchError.noResults
                 }
-                guard let previewURL = result.previewUrl else {
+                let previewableTracks = response.results.compactMap { result -> SongPreviewTrack? in
+                    guard let previewURL = result.previewUrl else { return nil }
+                    return SongPreviewTrack(
+                        id: result.trackId,
+                        name: result.trackName,
+                        artist: result.artistName,
+                        previewURL: self.secureURL(previewURL),
+                        storeURL: result.trackViewUrl.map { self.secureURL($0) }
+                    )
+                }
+                guard !previewableTracks.isEmpty else {
                     throw SearchError.noPreview
                 }
-                play(SongPreviewTrack(
-                    name: result.trackName,
-                    artist: result.artistName,
-                    previewURL: secureURL(previewURL),
-                    storeURL: result.trackViewUrl.map(secureURL)
-                ))
+                results = previewableTracks
             } catch is CancellationError {
                 return
             } catch {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+
+    func selectTrack(id: Int?) {
+        stopPlayer()
+        selectedTrackID = id
+        guard let id, let selectedTrack = results.first(where: { $0.id == id }) else {
+            track = nil
+            return
+        }
+        play(selectedTrack)
     }
 
     func togglePlayback() {
@@ -72,6 +92,8 @@ final class SongPreviewPlayer: ObservableObject {
         searchTask?.cancel()
         searchTask = nil
         stopPlayer()
+        results = []
+        selectedTrackID = nil
         track = nil
     }
 
@@ -88,7 +110,7 @@ final class SongPreviewPlayer: ObservableObject {
             URLQueryItem(name: "term", value: term),
             URLQueryItem(name: "media", value: "music"),
             URLQueryItem(name: "entity", value: "song"),
-            URLQueryItem(name: "limit", value: "1"),
+            URLQueryItem(name: "limit", value: "10"),
             URLQueryItem(name: "country", value: Locale.current.region?.identifier ?? "US")
         ]
         guard let url = components.url else { throw SearchError.invalidRequest }
@@ -110,6 +132,7 @@ final class SongPreviewPlayer: ObservableObject {
         #endif
         let item = AVPlayerItem(url: track.previewURL)
         player = AVPlayer(playerItem: item)
+        player?.actionAtItemEnd = .pause
         endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: item,
@@ -130,8 +153,10 @@ final class SongPreviewPlayer: ObservableObject {
     }
 
     private func handlePlaybackEnd() {
-        player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
-        isPlaying = false
+        guard let player else { return }
+        player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+        player.play()
+        isPlaying = true
     }
 
     private func removeEndObserver() {
@@ -147,6 +172,7 @@ private struct SearchResponse: Decodable {
 }
 
 private struct SearchResult: Decodable {
+    let trackId: Int
     let artistName: String
     let trackName: String
     let previewUrl: URL?
@@ -164,7 +190,7 @@ private enum SearchError: LocalizedError {
         case .invalidRequest: "Could not create the search request."
         case .requestFailed: "The iTunes search request failed."
         case .noResults: "No songs matched that search."
-        case .noPreview: "The first matching song has no preview."
+        case .noPreview: "None of the matching songs has a preview."
         }
     }
 }
