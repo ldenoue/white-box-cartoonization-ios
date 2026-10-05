@@ -34,12 +34,8 @@ final class CameraCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputS
             if !configured {
                 session.beginConfiguration()
                 session.sessionPreset = .hd1280x720
-                #if os(iOS)
                 let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
                     ?? AVCaptureDevice.default(for: .video)
-                #else
-                let device = AVCaptureDevice.default(for: .video)
-                #endif
                 guard let device, let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else {
                     session.commitConfiguration()
                     return
@@ -51,9 +47,7 @@ final class CameraCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputS
                 output.setSampleBufferDelegate(self, queue: outputQueue)
                 if session.canAddOutput(output) { session.addOutput(output) }
                 if let connection = output.connection(with: .video) {
-                    #if os(iOS)
                     if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
-                    #endif
                     if connection.isVideoMirroringSupported { connection.isVideoMirrored = true }
                 }
                 session.commitConfiguration()

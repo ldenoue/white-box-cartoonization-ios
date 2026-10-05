@@ -9,22 +9,13 @@
 /* Begin PBXBuildFile section */
 		033C327F83C67B80781477D1 /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29925A9C8A8A880B1992E1 /* CameraCapture.swift */; };
 		0BE9F435E02384BBCD611442 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA12CDAD398C7568FFAE72C /* ContentView.swift */; };
-		1DC7C6ACE6D110F2AE6670A1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA12CDAD398C7568FFAE72C /* ContentView.swift */; };
 		1E07DE073CA0A9A314088AFF /* Cartoonizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780905222D62CDEF498EDD10 /* Cartoonizer.swift */; };
-		2AECE499C8BA0684B66763DB /* WhiteBoxCartoonization384.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 965B8C45852CC4DB1B883DC6 /* WhiteBoxCartoonization384.mlpackage */; };
 		520C00A2979E237506D8D753 /* FrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACE5F7AE5FDED805F1BA079 /* FrameProcessor.swift */; };
 		6267FBFCBA32D71FD56F6E93 /* WhiteBoxCartoonization384.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 965B8C45852CC4DB1B883DC6 /* WhiteBoxCartoonization384.mlpackage */; };
-		6E3E55659556AFA3DFEF04FB /* FrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACE5F7AE5FDED805F1BA079 /* FrameProcessor.swift */; };
 		7C7286485E23503F6439E964 /* SongPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */; };
 		7FD91D11709DD0ABBB805EEA /* WhiteBoxCartoonizationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */; };
-		8C3A63DFAD2DC2E3F76421EC /* SongPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */; };
-		8C41D4584981A47C62EB8E2F /* WhiteBoxCartoonization256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */; };
 		92291666BAE4BD677446BB1B /* VideoPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7326849B71B8B723D4548F22 /* VideoPlayback.swift */; };
 		9F813DAFC6BAD35EADE5593E /* WhiteBoxCartoonization256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */; };
-		A0B89A099F1E0F040F02DE6C /* Cartoonizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780905222D62CDEF498EDD10 /* Cartoonizer.swift */; };
-		A0BCE43B1C19A102C21F4598 /* WhiteBoxCartoonizationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */; };
-		E15EF6C421E64DEDB9364EE9 /* VideoPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7326849B71B8B723D4548F22 /* VideoPlayback.swift */; };
-		F97A70607EB17CD1D32B1BDE /* CameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29925A9C8A8A880B1992E1 /* CameraCapture.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,7 +23,6 @@
 		7326849B71B8B723D4548F22 /* VideoPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayback.swift; sourceTree = "<group>"; };
 		780905222D62CDEF498EDD10 /* Cartoonizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartoonizer.swift; sourceTree = "<group>"; };
 		7DA12CDAD398C7568FFAE72C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		8969DAE7CA9E44D5F6F56034 /* WhiteBoxCartoonization-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WhiteBoxCartoonization-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		965B8C45852CC4DB1B883DC6 /* WhiteBoxCartoonization384.mlpackage */ = {isa = PBXFileReference; path = WhiteBoxCartoonization384.mlpackage; sourceTree = "<group>"; };
 		9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */ = {isa = PBXFileReference; path = WhiteBoxCartoonization256.mlpackage; sourceTree = "<group>"; };
 		BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteBoxCartoonizationApp.swift; sourceTree = "<group>"; };
@@ -60,7 +50,6 @@
 			isa = PBXGroup;
 			children = (
 				DCB68BB52C3152BAB227AB7C /* WhiteBoxCartoonization-iOS.app */,
-				8969DAE7CA9E44D5F6F56034 /* WhiteBoxCartoonization-macOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,23 +92,6 @@
 			productReference = DCB68BB52C3152BAB227AB7C /* WhiteBoxCartoonization-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		92B583E6916600AC674B19B7 /* WhiteBoxCartoonization-macOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A1E05743D04CF621B06633DE /* Build configuration list for PBXNativeTarget "WhiteBoxCartoonization-macOS" */;
-			buildPhases = (
-				FD1F7EDABF1E6CA63110F311 /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "WhiteBoxCartoonization-macOS";
-			packageProductDependencies = (
-			);
-			productName = "WhiteBoxCartoonization-macOS";
-			productReference = 8969DAE7CA9E44D5F6F56034 /* WhiteBoxCartoonization-macOS.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -130,10 +102,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					6B0F71B320ADDE2FA7FE2760 = {
-						DevelopmentTeam = 388X9C8CWR;
-						ProvisioningStyle = Automatic;
-					};
-					92B583E6916600AC674B19B7 = {
 						DevelopmentTeam = 388X9C8CWR;
 						ProvisioningStyle = Automatic;
 					};
@@ -154,7 +122,6 @@
 			projectRoot = "";
 			targets = (
 				6B0F71B320ADDE2FA7FE2760 /* WhiteBoxCartoonization-iOS */,
-				92B583E6916600AC674B19B7 /* WhiteBoxCartoonization-macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -173,22 +140,6 @@
 				9F813DAFC6BAD35EADE5593E /* WhiteBoxCartoonization256.mlpackage in Sources */,
 				6267FBFCBA32D71FD56F6E93 /* WhiteBoxCartoonization384.mlpackage in Sources */,
 				7FD91D11709DD0ABBB805EEA /* WhiteBoxCartoonizationApp.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FD1F7EDABF1E6CA63110F311 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F97A70607EB17CD1D32B1BDE /* CameraCapture.swift in Sources */,
-				A0B89A099F1E0F040F02DE6C /* Cartoonizer.swift in Sources */,
-				1DC7C6ACE6D110F2AE6670A1 /* ContentView.swift in Sources */,
-				6E3E55659556AFA3DFEF04FB /* FrameProcessor.swift in Sources */,
-				8C3A63DFAD2DC2E3F76421EC /* SongPreviewPlayer.swift in Sources */,
-				E15EF6C421E64DEDB9364EE9 /* VideoPlayback.swift in Sources */,
-				8C41D4584981A47C62EB8E2F /* WhiteBoxCartoonization256.mlpackage in Sources */,
-				2AECE499C8BA0684B66763DB /* WhiteBoxCartoonization384.mlpackage in Sources */,
-				A0BCE43B1C19A102C21F4598 /* WhiteBoxCartoonizationApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,12 +203,12 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -284,6 +235,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ldenoue.WhiteBoxCartoonization;
 				PRODUCT_NAME = "WhiteBox Cartoonization";
 				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -339,11 +291,11 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -370,45 +322,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ldenoue.WhiteBoxCartoonization;
 				PRODUCT_NAME = "WhiteBox Cartoonization";
 				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		B36EC7A11193081AD8904DA7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WhiteBoxCartoonization.entitlements;
-				COMBINE_HIDPI_IMAGES = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Cartoonize the live camera entirely on this Mac.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a video to cartoonize entirely on this Mac.";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ldenoue.WhiteBoxCartoonization.mac;
-				PRODUCT_NAME = "White Box Cartoonization";
-				SDKROOT = macosx;
-			};
-			name = Debug;
-		};
-		CF290F440F43C8E5FC1311DA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = WhiteBoxCartoonization.entitlements;
-				COMBINE_HIDPI_IMAGES = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Cartoonize the live camera entirely on this Mac.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a video to cartoonize entirely on this Mac.";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ldenoue.WhiteBoxCartoonization.mac;
-				PRODUCT_NAME = "White Box Cartoonization";
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -429,15 +344,6 @@
 			buildConfigurations = (
 				2451B0D8F02F3231665DF2F8 /* Debug */,
 				50AFFCA045A5459D5EDCB942 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		A1E05743D04CF621B06633DE /* Build configuration list for PBXNativeTarget "WhiteBoxCartoonization-macOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B36EC7A11193081AD8904DA7 /* Debug */,
-				CF290F440F43C8E5FC1311DA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

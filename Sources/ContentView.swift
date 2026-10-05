@@ -17,21 +17,12 @@ struct ContentView: View {
     @State private var pickedItem: PhotosPickerItem?
     @State private var isVideoPickerPresented = false
     @State private var isSongSheetPresented = false
+    @State private var isVideoDropTargeted = false
     @FocusState private var isSongSearchFocused: Bool
 
     var body: some View {
         responsiveContent
-        #if os(macOS)
-        .fileImporter(
-            isPresented: $isVideoPickerPresented,
-            allowedContentTypes: [.movie],
-            allowsMultipleSelection: false
-        ) { result in
-            importMacVideo(result)
-        }
-        #else
         .photosPicker(isPresented: $isVideoPickerPresented, selection: $pickedItem, matching: .videos)
-        #endif
         .sheet(isPresented: $isSongSheetPresented) {
             songSearchSheet
         }
@@ -53,7 +44,6 @@ struct ContentView: View {
             }
         }
         .onChange(of: pickedItem) { _, item in
-            #if !os(macOS)
             guard let item else { return }
             Task {
                 do {
@@ -63,28 +53,10 @@ struct ContentView: View {
                     processor.errorMessage = error.localizedDescription
                 }
             }
-            #endif
         }
     }
 
-    @ViewBuilder
     private var responsiveContent: some View {
-        #if os(macOS)
-        ScrollView {
-            VStack(spacing: 16) {
-                header
-                sourcePicker
-                settingsPanel
-                preview
-                    .aspectRatio(1, contentMode: .fit)
-                    .frame(maxWidth: 640, maxHeight: 640)
-                statusPanel
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-        }
-        .frame(minWidth: 360, minHeight: 560)
-        #else
         GeometryReader { geometry in
             if geometry.size.width > geometry.size.height {
                 HStack(spacing: 0) {
@@ -120,7 +92,6 @@ struct ContentView: View {
                 }
             }
         }
-        #endif
     }
 
     private var header: some View {
@@ -233,8 +204,34 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
             }
+
+            if isVideoDropTargeted {
+                Color.black.opacity(0.45)
+                VStack(spacing: 10) {
+                    Image(systemName: "arrow.down.doc.fill")
+                        .font(.system(size: 34))
+                    Text("Drop video to cartoonize")
+                        .font(.headline)
+                }
+                .foregroundStyle(.white)
+            }
         }
         .clipped()
+        .overlay {
+            if isVideoDropTargeted {
+                Rectangle()
+                    .strokeBorder(.tint, style: StrokeStyle(lineWidth: 4, dash: [10, 6]))
+            }
+        }
+        .dropDestination(for: PickedMovie.self) { movies, _ in
+            guard let movie = movies.first else { return false }
+            source = .video
+            pickedItem = nil
+            playback.load(url: movie.url)
+            return true
+        } isTargeted: { isTargeted in
+            isVideoDropTargeted = isTargeted
+        }
     }
 
     private var performanceOverlay: some View {
@@ -260,7 +257,7 @@ struct ContentView: View {
                         playback.isPlaying ? playback.pause() : playback.play()
                     }
                 } else {
-                    Text("Tap Video to choose a clip.")
+                    Text("Tap Video to choose a clip, or drop one onto the preview.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -277,16 +274,10 @@ struct ContentView: View {
         .frame(maxWidth: 640)
     }
 
-    @ViewBuilder
     private var songSearchSheet: some View {
-        #if os(macOS)
-        songSearchContent
-            .frame(minWidth: 440, minHeight: 500)
-        #else
         songSearchContent
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
-        #endif
     }
 
     private var songSearchContent: some View {
@@ -374,29 +365,6 @@ struct ContentView: View {
         guard input == .video else { return }
         pickedItem = nil
         isVideoPickerPresented = true
-    }
-
-    #if os(macOS)
-    private func importMacVideo(_ result: Result<[URL], Error>) {
-        do {
-            guard let sourceURL = try result.get().first else { return }
-            let hasSecurityAccess = sourceURL.startAccessingSecurityScopedResource()
-            defer {
-                if hasSecurityAccess { sourceURL.stopAccessingSecurityScopedResource() }
-            }
-            playback.load(url: try Self.copyVideoToTemporaryDirectory(sourceURL))
-        } catch {
-            processor.errorMessage = error.localizedDescription
-        }
-    }
-    #endif
-
-    private static func copyVideoToTemporaryDirectory(_ sourceURL: URL) throws -> URL {
-        let destination = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension(sourceURL.pathExtension.isEmpty ? "mov" : sourceURL.pathExtension)
-        try FileManager.default.copyItem(at: sourceURL, to: destination)
-        return destination
     }
 
     private func wireInputs() {

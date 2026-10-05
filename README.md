@@ -4,7 +4,7 @@ A native SwiftUI test bench for the White-box Cartoonization model used by the s
 
 On iPhone and iPad, the cartoon preview uses the full available width in portrait and the full available height in landscape. Controls scroll below the preview in portrait and move into a side panel in landscape, so they never squeeze the live canvas.
 
-Tap the **Video** segment to choose a clip directly: iPhone and iPad open the system Photos picker, while macOS opens a Finder file chooser. Selected videos play muted, loop automatically, and can be replaced by tapping the segment again.
+Tap the **Video** segment to choose a clip from Photos, or drag a movie from Files or Finder directly onto the preview. The drop target highlights while a compatible movie is over it. Selected videos play muted, loop automatically, and can be replaced by tapping the segment or dropping another movie.
 
 Tap **Choose a song** to open a dedicated search sheet and retrieve up to 10 previewable results from Apple's iTunes Search API. Choosing a result closes the sheet and streams its preview on a loop. The compact now-playing row shows the selected title and artist, provides play/pause and a store link, and does not download or save preview audio.
 
@@ -16,7 +16,7 @@ The optional **Person on green screen** toggle first runs Apple's on-device Visi
 | --- | --- |
 | <img src="Assets/white-box-camera.jpg" alt="Live camera cartoonized with the White-box Core ML model" width="360"> | <img src="Assets/white-box-green-screen.jpg" alt="Cartoonized person composited over a green background using Apple Vision segmentation" width="360"> |
 
-The same source builds as an iOS/iPadOS app and a sandboxed macOS app. All frames remain on-device.
+The single iOS/iPadOS target also runs unmodified on Apple-silicon Macs as a **Designed for iPad** app. This avoids maintaining a separate native macOS target while retaining Finder drag and drop. All frames remain on-device.
 
 ## What is included
 
@@ -30,7 +30,7 @@ The conversion folds the browser pipeline's RGB↔BGR channel swap, `[-1, 1]` no
 
 ## Run
 
-Open `WhiteBoxCartoonization.xcodeproj`, select either `WhiteBoxCartoonization-iOS` or `WhiteBoxCartoonization-macOS`, set a Development Team when deploying to an iPhone, and Run. Camera access is requested only when the camera source starts. The Video tab uses the system Photos picker.
+Open `WhiteBoxCartoonization.xcodeproj`, select `WhiteBoxCartoonization-iOS`, choose an iPhone, iPad, or **My Mac (Designed for iPad)** destination, and Run. Camera access is requested only when the camera source starts. The Video tab uses the system Photos picker; videos can also be dropped onto the preview from Files on iPad or Finder on Mac.
 
 Regenerate the project after changing `project.yml`:
 
