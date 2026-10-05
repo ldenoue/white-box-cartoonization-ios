@@ -15,11 +15,13 @@
 		7C7286485E23503F6439E964 /* SongPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */; };
 		7FD91D11709DD0ABBB805EEA /* WhiteBoxCartoonizationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A9E6DA5C227CBB1E36101 /* WhiteBoxCartoonizationApp.swift */; };
 		92291666BAE4BD677446BB1B /* VideoPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7326849B71B8B723D4548F22 /* VideoPlayback.swift */; };
+		9678B0A256F5E11FF570E1AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6D03A39419F8066B4BD1C9DF /* Assets.xcassets */; };
 		9F813DAFC6BAD35EADE5593E /* WhiteBoxCartoonization256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 9A51CCA39999EC67F4F94A7D /* WhiteBoxCartoonization256.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		24A5AE78471B1836656C08B2 /* SongPreviewPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPreviewPlayer.swift; sourceTree = "<group>"; };
+		6D03A39419F8066B4BD1C9DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7326849B71B8B723D4548F22 /* VideoPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayback.swift; sourceTree = "<group>"; };
 		780905222D62CDEF498EDD10 /* Cartoonizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartoonizer.swift; sourceTree = "<group>"; };
 		7DA12CDAD398C7568FFAE72C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				BF64C1E9940C85EB95CAFAB2 /* Models */,
+				C238D44BDDA1DDD648CC1D3F /* Resources */,
 				2ACEE246951E84F3FF29C534 /* Sources */,
 				A0F74C45FF4014872A1B8932 /* Products */,
 			);
@@ -72,6 +75,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		C238D44BDDA1DDD648CC1D3F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6D03A39419F8066B4BD1C9DF /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -80,6 +91,7 @@
 			buildConfigurationList = 95684A385EECA449F5865EA6 /* Build configuration list for PBXNativeTarget "WhiteBoxCartoonization-iOS" */;
 			buildPhases = (
 				42B29DDD04885E87218A44B5 /* Sources */,
+				AA12E9F5FDFF409C19E4EBE9 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -125,6 +137,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA12E9F5FDFF409C19E4EBE9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9678B0A256F5E11FF570E1AB /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		42B29DDD04885E87218A44B5 /* Sources */ = {

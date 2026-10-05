@@ -24,6 +24,7 @@ The single iOS/iPadOS target also runs unmodified on Apple-silicon Macs as a **D
 
 - `Models/WhiteBoxCartoonization256.mlpackage`: 256 × 256 FP16 ML Program with RGB `CVPixelBuffer` input and output.
 - `Models/WhiteBoxCartoonization384.mlpackage`: higher-detail 384 × 384 variant using the same weights.
+- `Resources/Assets.xcassets`: universal 1024 × 1024 app icon artwork for iPhone, iPad, and Designed for iPad on Mac.
 - `Sources/`: shared camera, Photos video playback, center-crop, Core ML inference, and SwiftUI UI.
 - `scripts/convert_coreml.py`: reproducible ONNX → PyTorch → Core ML conversion with ONNX Runtime parity validation.
 - `project.yml`: XcodeGen source for the checked-in Xcode project.
