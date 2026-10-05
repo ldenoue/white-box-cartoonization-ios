@@ -174,6 +174,23 @@ struct ContentView: View {
                 }
             }
 
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Model input blur")
+                    Spacer()
+                    Text(processor.inputBlurRadius == 0
+                         ? "Off"
+                         : String(format: "%.1f px", processor.inputBlurRadius))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                Slider(value: $processor.inputBlurRadius, in: 0...20, step: 0.5)
+                    .accessibilityLabel("Model input blur radius")
+                Text("Applied after resizing, immediately before Core ML")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             songControl
         }
         .frame(maxWidth: 420)
@@ -280,6 +297,9 @@ struct ContentView: View {
                 Text(String(format: "%.1f ms total", processor.pipelineLatencyMS))
             }
             Text(String(format: "%d² · %.1f ms Core ML", processor.inputSize, processor.modelLatencyMS))
+            if processor.inputBlurRadius > 0 {
+                Text(String(format: "Input blur · %.1f px", processor.inputBlurRadius))
+            }
         }
         .font(.caption.monospacedDigit())
         .foregroundStyle(.white)

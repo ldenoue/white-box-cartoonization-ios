@@ -11,6 +11,7 @@ final class FrameProcessor: ObservableObject {
     @Published var errorMessage: String?
     @Published var usesPersonSegmentation = false
     @Published var inputSize = 256
+    @Published var inputBlurRadius = 0.0
 
     private let worker = InferenceWorker()
     private var processing = false
@@ -23,6 +24,7 @@ final class FrameProcessor: ObservableObject {
             pixelBuffer,
             sourceTransform: sourceTransform,
             inputSize: inputSize,
+            inputBlurRadius: inputBlurRadius,
             applyingPersonSegmentation: usesPersonSegmentation
         ) { [weak self] result in
             Task { @MainActor in
@@ -65,6 +67,7 @@ private final class InferenceWorker: @unchecked Sendable {
         _ pixelBuffer: CVPixelBuffer,
         sourceTransform: CGAffineTransform,
         inputSize: Int,
+        inputBlurRadius: Double,
         applyingPersonSegmentation: Bool,
         completion: @escaping @Sendable (Result<Cartoonizer.Result, Error>) -> Void
     ) {
@@ -76,6 +79,7 @@ private final class InferenceWorker: @unchecked Sendable {
                 completion(.success(try engine.predict(
                     box.value,
                     sourceTransform: sourceTransform,
+                    inputBlurRadius: inputBlurRadius,
                     applyingPersonSegmentation: applyingPersonSegmentation
                 )))
             } catch {

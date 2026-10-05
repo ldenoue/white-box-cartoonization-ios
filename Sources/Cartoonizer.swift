@@ -35,6 +35,7 @@ final class Cartoonizer: @unchecked Sendable {
     func predict(
         _ source: CVPixelBuffer,
         sourceTransform: CGAffineTransform,
+        inputBlurRadius: Double,
         applyingPersonSegmentation: Bool
     ) throws -> Result {
         let pipelineStarted = ContinuousClock.now
@@ -51,13 +52,22 @@ final class Cartoonizer: @unchecked Sendable {
         let side = min(extent.width, extent.height)
         let crop = CGRect(x: extent.midX - side / 2, y: extent.midY - side / 2, width: side, height: side)
         let scale = inputSize / side
-        let prepared = sourceImage.cropped(to: crop)
+        let inputExtent = CGRect(x: 0, y: 0, width: inputSize, height: inputSize)
+        var prepared = sourceImage.cropped(to: crop)
             .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
             .transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        if inputBlurRadius > 0 {
+            prepared = prepared
+                .clampedToExtent()
+                .applyingFilter("CIGaussianBlur", parameters: [
+                    kCIInputRadiusKey: inputBlurRadius
+                ])
+                .cropped(to: inputExtent)
+        }
         context.render(
             prepared,
             to: inputBuffer,
-            bounds: CGRect(x: 0, y: 0, width: inputSize, height: inputSize),
+            bounds: inputExtent,
             colorSpace: CGColorSpaceCreateDeviceRGB()
         )
 

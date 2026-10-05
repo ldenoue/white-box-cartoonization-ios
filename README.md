@@ -10,6 +10,8 @@ Tap **Choose a song** to open a dedicated search sheet on iPhone/iPad or a right
 
 The optional **Person on green screen** toggle first runs Apple's on-device Vision person-segmentation model, composites the detected person over pure green, and feeds that result to White-box Cartoonization. A translucent overlay on the live preview reports output FPS, total pipeline latency, resolution, and Core ML model latency so the segmentation cost remains visible without taking space from the canvas.
 
+The **Model input blur** slider applies a 0–20 px Gaussian blur after the frame is cropped and resized to the selected model resolution, immediately before Core ML inference. Applying blur in 256 × 256 or 384 × 384 model coordinates makes a chosen radius consistent across camera and video source resolutions. The filter clamps image edges before blurring and crops back to the exact input extent to avoid artificial borders; the active radius also appears in the preview overlay.
+
 ## Examples
 
 | White-box camera | Vision person segmentation + green screen |
