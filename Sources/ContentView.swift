@@ -1,3 +1,4 @@
+import Foundation
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -16,16 +17,13 @@ struct ContentView: View {
     @State private var source = InputSource.camera
     @State private var pickedItem: PhotosPickerItem?
     @State private var isVideoPickerPresented = false
-    @State private var isSongSheetPresented = false
+    @State private var isSongPickerPresented = false
     @State private var isVideoDropTargeted = false
     @FocusState private var isSongSearchFocused: Bool
 
     var body: some View {
-        responsiveContent
+        songPickerHost
         .photosPicker(isPresented: $isVideoPickerPresented, selection: $pickedItem, matching: .videos)
-        .sheet(isPresented: $isSongSheetPresented) {
-            songSearchSheet
-        }
         .onAppear {
             wireInputs()
             camera.start()
@@ -53,6 +51,47 @@ struct ContentView: View {
                     processor.errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var songPickerHost: some View {
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            macSongDrawerHost
+        } else {
+            responsiveContent
+                .sheet(isPresented: $isSongPickerPresented) {
+                    songSearchSheet
+                }
+        }
+    }
+
+    private var macSongDrawerHost: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .trailing) {
+                responsiveContent
+
+                if isSongPickerPresented {
+                    Color.black.opacity(0.22)
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture { isSongPickerPresented = false }
+                        .transition(.opacity)
+                        .zIndex(1)
+
+                    songSearchContent
+                        .frame(
+                            width: min(geometry.size.width, min(440, max(320, geometry.size.width * 0.42))),
+                            height: geometry.size.height
+                        )
+                        .background(.regularMaterial)
+                        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 20))
+                        .shadow(color: .black.opacity(0.25), radius: 20, x: -8)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                        .zIndex(2)
+                }
+            }
+            .animation(.snappy(duration: 0.28), value: isSongPickerPresented)
         }
     }
 
@@ -168,7 +207,7 @@ struct ContentView: View {
                     .accessibilityLabel("View in iTunes")
                 }
                 Button {
-                    isSongSheetPresented = true
+                    isSongPickerPresented = true
                 } label: {
                     Image(systemName: "magnifyingglass")
                 }
@@ -176,7 +215,7 @@ struct ContentView: View {
             }
         } else {
             Button {
-                isSongSheetPresented = true
+                isSongPickerPresented = true
             } label: {
                 Label("Choose a song", systemImage: "music.note.list")
                     .frame(maxWidth: .infinity)
@@ -323,7 +362,7 @@ struct ContentView: View {
                     List(songPreview.results) { result in
                         Button {
                             songPreview.selectTrack(id: result.id)
-                            isSongSheetPresented = false
+                            isSongPickerPresented = false
                         } label: {
                             HStack(spacing: 10) {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -353,7 +392,8 @@ struct ContentView: View {
             .navigationTitle("Choose a Song")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { isSongSheetPresented = false }
+                    Button("Done") { isSongPickerPresented = false }
+                        .keyboardShortcut(.cancelAction)
                 }
             }
             .onAppear { isSongSearchFocused = true }
