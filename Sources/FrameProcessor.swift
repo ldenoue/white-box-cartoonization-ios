@@ -1,3 +1,4 @@
+import CoreGraphics
 import CoreVideo
 import Foundation
 
@@ -15,11 +16,12 @@ final class FrameProcessor: ObservableObject {
     private var processing = false
     private var lastCompletion: ContinuousClock.Instant?
 
-    func submit(_ pixelBuffer: CVPixelBuffer) {
+    func submit(_ pixelBuffer: CVPixelBuffer, sourceTransform: CGAffineTransform = .identity) {
         guard !processing else { return }
         processing = true
         worker.submit(
             pixelBuffer,
+            sourceTransform: sourceTransform,
             inputSize: inputSize,
             applyingPersonSegmentation: usesPersonSegmentation
         ) { [weak self] result in
@@ -61,6 +63,7 @@ private final class InferenceWorker: @unchecked Sendable {
 
     func submit(
         _ pixelBuffer: CVPixelBuffer,
+        sourceTransform: CGAffineTransform,
         inputSize: Int,
         applyingPersonSegmentation: Bool,
         completion: @escaping @Sendable (Result<Cartoonizer.Result, Error>) -> Void
@@ -72,6 +75,7 @@ private final class InferenceWorker: @unchecked Sendable {
                 cartoonizers[inputSize] = engine
                 completion(.success(try engine.predict(
                     box.value,
+                    sourceTransform: sourceTransform,
                     applyingPersonSegmentation: applyingPersonSegmentation
                 )))
             } catch {

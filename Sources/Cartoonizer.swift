@@ -32,11 +32,20 @@ final class Cartoonizer: @unchecked Sendable {
         inputBuffer = try Self.makePixelBuffer(size: inputSize)
     }
 
-    func predict(_ source: CVPixelBuffer, applyingPersonSegmentation: Bool) throws -> Result {
+    func predict(
+        _ source: CVPixelBuffer,
+        sourceTransform: CGAffineTransform,
+        applyingPersonSegmentation: Bool
+    ) throws -> Result {
         let pipelineStarted = ContinuousClock.now
-        var sourceImage = CIImage(cvPixelBuffer: source)
+        var sourceImage = CIImage(cvPixelBuffer: source).transformed(by: sourceTransform)
+        let transformedExtent = sourceImage.extent
+        sourceImage = sourceImage.transformed(by: CGAffineTransform(
+            translationX: -transformedExtent.minX,
+            y: -transformedExtent.minY
+        ))
         if applyingPersonSegmentation {
-            sourceImage = try greenScreenedPerson(from: source, sourceImage: sourceImage)
+            sourceImage = try greenScreenedPerson(from: sourceImage)
         }
         let extent = sourceImage.extent
         let side = min(extent.width, extent.height)
@@ -70,8 +79,8 @@ final class Cartoonizer: @unchecked Sendable {
         )
     }
 
-    private func greenScreenedPerson(from pixelBuffer: CVPixelBuffer, sourceImage: CIImage) throws -> CIImage {
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+    private func greenScreenedPerson(from sourceImage: CIImage) throws -> CIImage {
+        let handler = VNImageRequestHandler(ciImage: sourceImage, options: [:])
         try handler.perform([personSegmentationRequest])
         guard let maskBuffer = personSegmentationRequest.results?.first?.pixelBuffer else {
             throw CocoaError(.coderInvalidValue, userInfo: [NSLocalizedDescriptionKey: "Apple Vision did not return a person mask."])

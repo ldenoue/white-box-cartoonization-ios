@@ -9,11 +9,29 @@ final class VideoPlayback: ObservableObject {
     private var videoOutput: AVPlayerItemVideoOutput?
     private var timer: Timer?
     private var endObserver: NSObjectProtocol?
-    var onFrame: ((CVPixelBuffer) -> Void)?
+    private var loadTask: Task<Void, Never>?
+    private var preferredTransform = CGAffineTransform.identity
+    var onFrame: ((CVPixelBuffer, CGAffineTransform) -> Void)?
 
     func load(url: URL) {
         stop()
-        let item = AVPlayerItem(url: url)
+        let asset = AVURLAsset(url: url)
+        loadTask = Task { [weak self] in
+            do {
+                guard let track = try await asset.loadTracks(withMediaType: .video).first else { return }
+                let transform = try await track.load(.preferredTransform)
+                guard !Task.isCancelled else { return }
+                self?.prepare(asset: asset, preferredTransform: transform)
+            } catch {
+                guard !Task.isCancelled else { return }
+                self?.hasVideo = false
+            }
+        }
+    }
+
+    private func prepare(asset: AVAsset, preferredTransform: CGAffineTransform) {
+        self.preferredTransform = preferredTransform
+        let item = AVPlayerItem(asset: asset)
         let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
         ])
@@ -51,6 +69,8 @@ final class VideoPlayback: ObservableObject {
     }
 
     func stop() {
+        loadTask?.cancel()
+        loadTask = nil
         pause()
         if let endObserver {
             NotificationCenter.default.removeObserver(endObserver)
@@ -58,6 +78,7 @@ final class VideoPlayback: ObservableObject {
         }
         player = nil
         videoOutput = nil
+        preferredTransform = .identity
         hasVideo = false
     }
 
@@ -73,6 +94,6 @@ final class VideoPlayback: ObservableObject {
         let time = player.currentTime()
         guard videoOutput.hasNewPixelBuffer(forItemTime: time),
               let buffer = videoOutput.copyPixelBuffer(forItemTime: time, itemTimeForDisplay: nil) else { return }
-        onFrame?(buffer)
+        onFrame?(buffer, preferredTransform)
     }
 }

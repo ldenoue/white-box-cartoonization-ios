@@ -237,7 +237,9 @@ struct ContentView: View {
         camera.onFrame = { [weak processor] buffer in
             DispatchQueue.main.async { processor?.submit(buffer) }
         }
-        playback.onFrame = { [weak processor] buffer in processor?.submit(buffer) }
+        playback.onFrame = { [weak processor] buffer, transform in
+            processor?.submit(buffer, sourceTransform: transform)
+        }
     }
 }
 
