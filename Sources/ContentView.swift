@@ -18,148 +18,7 @@ struct ContentView: View {
     @State private var isVideoPickerPresented = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text("White Box Cartoonization")
-                .font(.title2.bold())
-
-            HStack(spacing: 2) {
-                ForEach(InputSource.allCases) { input in
-                    Button(input.rawValue) {
-                        select(input)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.body.weight(source == input ? .semibold : .regular))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.primary.opacity(source == input ? 0.12 : 0), in: Capsule())
-                    .accessibilityAddTraits(source == input ? .isSelected : [])
-                }
-            }
-            .padding(2)
-            .background(Color.secondary.opacity(0.14), in: Capsule())
-            .frame(maxWidth: 420)
-
-            Picker("Resolution", selection: $processor.inputSize) {
-                Text("256 × 256 · Fast").tag(256)
-                Text("384 × 384 · Detailed").tag(384)
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 420)
-
-            Toggle(isOn: $processor.usesPersonSegmentation) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Person on green screen")
-                    Text("Apple Vision segmentation runs before cartoonization")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .frame(maxWidth: 420)
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    TextField("Song or artist", text: $songPreview.query)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit { songPreview.search() }
-                    Button {
-                        songPreview.search()
-                    } label: {
-                        if songPreview.isSearching {
-                            ProgressView().controlSize(.small)
-                        } else {
-                            Label("Find songs", systemImage: "magnifyingglass")
-                        }
-                    }
-                    .disabled(songPreview.isSearching)
-                }
-                if !songPreview.results.isEmpty {
-                    Picker(
-                        "Preview",
-                        selection: Binding(
-                            get: { songPreview.selectedTrackID },
-                            set: { songPreview.selectTrack(id: $0) }
-                        )
-                    ) {
-                        Text("Choose from \(songPreview.results.count) songs").tag(Int?.none)
-                        ForEach(songPreview.results) { result in
-                            Text("\(result.name) — \(result.artist)").tag(Optional(result.id))
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-                if let track = songPreview.track {
-                    HStack(spacing: 8) {
-                        Button {
-                            songPreview.togglePlayback()
-                        } label: {
-                            Image(systemName: songPreview.isPlaying ? "pause.fill" : "play.fill")
-                        }
-                        .buttonStyle(.plain)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(track.name).lineLimit(1)
-                            Text(track.artist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                        }
-                        Spacer()
-                        if let storeURL = track.storeURL {
-                            Link("View in iTunes", destination: storeURL)
-                                .font(.caption)
-                        }
-                    }
-                    Text("Preview provided courtesy of iTunes")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                } else if let error = songPreview.errorMessage {
-                    Text(error).font(.caption).foregroundStyle(.red)
-                }
-            }
-            .frame(maxWidth: 420)
-
-            ZStack {
-                RoundedRectangle(cornerRadius: 18).fill(.black)
-                if let image = processor.image {
-                    Image(decorative: image, scale: 1)
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                } else {
-                    ContentUnavailableView("Waiting for a frame", systemImage: source == .camera ? "camera" : "film")
-                        .foregroundStyle(.white)
-                }
-            }
-            .aspectRatio(1, contentMode: .fit)
-            .frame(maxWidth: 640, maxHeight: 640)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-
-            HStack(spacing: 18) {
-                Label(String(format: "%.1f ms pipeline", processor.pipelineLatencyMS), systemImage: "gauge.with.dots.needle.67percent")
-                Label(String(format: "%.1f FPS", processor.throughputFPS), systemImage: "speedometer")
-                Text(String(format: "%d² · Core ML %.1f ms", processor.inputSize, processor.modelLatencyMS))
-                    .foregroundStyle(.secondary)
-            }
-            .font(.callout.monospacedDigit())
-
-            if source == .video {
-                if playback.hasVideo {
-                    Button(playback.isPlaying ? "Pause" : "Play") {
-                        playback.isPlaying ? playback.pause() : playback.play()
-                    }
-                } else {
-                    Text("Tap Video to choose a clip.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Text("Camera frames never leave this device.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let error = processor.errorMessage {
-                Text(error).foregroundStyle(.red).font(.footnote)
-            }
-        }
-        .padding()
-        .frame(minWidth: 360, minHeight: 560)
+        responsiveContent
         #if os(macOS)
         .fileImporter(
             isPresented: $isVideoPickerPresented,
@@ -201,6 +60,226 @@ struct ContentView: View {
             }
             #endif
         }
+    }
+
+    @ViewBuilder
+    private var responsiveContent: some View {
+        #if os(macOS)
+        ScrollView {
+            VStack(spacing: 16) {
+                header
+                sourcePicker
+                settingsPanel
+                preview
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxWidth: 640, maxHeight: 640)
+                statusPanel
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+        }
+        .frame(minWidth: 360, minHeight: 560)
+        #else
+        GeometryReader { geometry in
+            if geometry.size.width > geometry.size.height {
+                HStack(spacing: 0) {
+                    preview
+                        .frame(width: geometry.size.height, height: geometry.size.height)
+
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            header
+                            sourcePicker
+                            settingsPanel
+                            statusPanel
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            } else {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        header
+                        sourcePicker
+                            .padding(.horizontal)
+                        preview
+                            .frame(width: geometry.size.width, height: geometry.size.width)
+                        settingsPanel
+                            .padding(.horizontal)
+                        statusPanel
+                            .padding(.horizontal)
+                    }
+                    .padding(.vertical)
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+        #endif
+    }
+
+    private var header: some View {
+        Text("White Box Cartoonization")
+            .font(.title2.bold())
+    }
+
+    private var sourcePicker: some View {
+        HStack(spacing: 2) {
+            ForEach(InputSource.allCases) { input in
+                Button(input.rawValue) {
+                    select(input)
+                }
+                .buttonStyle(.plain)
+                .font(.body.weight(source == input ? .semibold : .regular))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Color.primary.opacity(source == input ? 0.12 : 0), in: Capsule())
+                .accessibilityAddTraits(source == input ? .isSelected : [])
+            }
+        }
+        .padding(2)
+        .background(Color.secondary.opacity(0.14), in: Capsule())
+        .frame(maxWidth: 420)
+    }
+
+    private var settingsPanel: some View {
+        VStack(spacing: 16) {
+            Picker("Resolution", selection: $processor.inputSize) {
+                Text("256 × 256 · Fast").tag(256)
+                Text("384 × 384 · Detailed").tag(384)
+            }
+            .pickerStyle(.segmented)
+
+            Toggle(isOn: $processor.usesPersonSegmentation) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Person on green screen")
+                    Text("Apple Vision segmentation runs before cartoonization")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            songPanel
+        }
+        .frame(maxWidth: 420)
+    }
+
+    private var songPanel: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                TextField("Song or artist", text: $songPreview.query)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit { songPreview.search() }
+                Button {
+                    songPreview.search()
+                } label: {
+                    if songPreview.isSearching {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Label("Find songs", systemImage: "magnifyingglass")
+                    }
+                }
+                .disabled(songPreview.isSearching)
+            }
+            if !songPreview.results.isEmpty {
+                Picker(
+                    "Preview",
+                    selection: Binding(
+                        get: { songPreview.selectedTrackID },
+                        set: { songPreview.selectTrack(id: $0) }
+                    )
+                ) {
+                    Text("Choose from \(songPreview.results.count) songs").tag(Int?.none)
+                    ForEach(songPreview.results) { result in
+                        Text("\(result.name) — \(result.artist)").tag(Optional(result.id))
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+            if let track = songPreview.track {
+                HStack(spacing: 8) {
+                    Button {
+                        songPreview.togglePlayback()
+                    } label: {
+                        Image(systemName: songPreview.isPlaying ? "pause.fill" : "play.fill")
+                    }
+                    .buttonStyle(.plain)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(track.name).lineLimit(1)
+                        Text(track.artist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    Spacer()
+                    if let storeURL = track.storeURL {
+                        Link("View in iTunes", destination: storeURL)
+                            .font(.caption)
+                    }
+                }
+                Text("Preview provided courtesy of iTunes")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else if let error = songPreview.errorMessage {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
+        }
+    }
+
+    private var preview: some View {
+        ZStack {
+            Color.black
+            if let image = processor.image {
+                Image(decorative: image, scale: 1)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+            } else {
+                ContentUnavailableView("Waiting for a frame", systemImage: source == .camera ? "camera" : "film")
+                    .foregroundStyle(.white)
+            }
+        }
+        .clipped()
+    }
+
+    private var statusPanel: some View {
+        VStack(spacing: 12) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 18) {
+                    metrics
+                }
+                VStack(spacing: 4) {
+                    metrics
+                }
+            }
+            .font(.callout.monospacedDigit())
+
+            if source == .video {
+                if playback.hasVideo {
+                    Button(playback.isPlaying ? "Pause" : "Play") {
+                        playback.isPlaying ? playback.pause() : playback.play()
+                    }
+                } else {
+                    Text("Tap Video to choose a clip.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text("Camera frames never leave this device.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if let error = processor.errorMessage {
+                Text(error).foregroundStyle(.red).font(.footnote)
+            }
+        }
+        .frame(maxWidth: 640)
+    }
+
+    @ViewBuilder
+    private var metrics: some View {
+        Label(String(format: "%.1f ms pipeline", processor.pipelineLatencyMS), systemImage: "gauge.with.dots.needle.67percent")
+        Label(String(format: "%.1f FPS", processor.throughputFPS), systemImage: "speedometer")
+        Text(String(format: "%d² · Core ML %.1f ms", processor.inputSize, processor.modelLatencyMS))
+            .foregroundStyle(.secondary)
     }
 
     private func select(_ input: InputSource) {
