@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var source = InputSource.camera
     @State private var pickedItem: PhotosPickerItem?
     @State private var isVideoPickerPresented = false
+    @State private var isSongSheetPresented = false
+    @FocusState private var isSongSearchFocused: Bool
 
     var body: some View {
         responsiveContent
@@ -30,6 +32,9 @@ struct ContentView: View {
         #else
         .photosPicker(isPresented: $isVideoPickerPresented, selection: $pickedItem, matching: .videos)
         #endif
+        .sheet(isPresented: $isSongSheetPresented) {
+            songSearchSheet
+        }
         .onAppear {
             wireInputs()
             camera.start()
@@ -159,67 +164,53 @@ struct ContentView: View {
                 }
             }
 
-            songPanel
+            songControl
         }
         .frame(maxWidth: 420)
     }
 
-    private var songPanel: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                TextField("Song or artist", text: $songPreview.query)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit { songPreview.search() }
+    @ViewBuilder
+    private var songControl: some View {
+        if let track = songPreview.track {
+            HStack(spacing: 10) {
                 Button {
-                    songPreview.search()
+                    songPreview.togglePlayback()
                 } label: {
-                    if songPreview.isSearching {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Label("Find songs", systemImage: "magnifyingglass")
-                    }
+                    Image(systemName: songPreview.isPlaying ? "pause.fill" : "play.fill")
+                        .frame(width: 28, height: 28)
                 }
-                .disabled(songPreview.isSearching)
-            }
-            if !songPreview.results.isEmpty {
-                Picker(
-                    "Preview",
-                    selection: Binding(
-                        get: { songPreview.selectedTrackID },
-                        set: { songPreview.selectTrack(id: $0) }
-                    )
-                ) {
-                    Text("Choose from \(songPreview.results.count) songs").tag(Int?.none)
-                    ForEach(songPreview.results) { result in
-                        Text("\(result.name) — \(result.artist)").tag(Optional(result.id))
-                    }
+                .buttonStyle(.bordered)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(track.name).lineLimit(1)
+                    Text("\(track.artist) · iTunes preview")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
-                .pickerStyle(.menu)
-            }
-            if let track = songPreview.track {
-                HStack(spacing: 8) {
-                    Button {
-                        songPreview.togglePlayback()
-                    } label: {
-                        Image(systemName: songPreview.isPlaying ? "pause.fill" : "play.fill")
+
+                Spacer(minLength: 4)
+                if let storeURL = track.storeURL {
+                    Link(destination: storeURL) {
+                        Image(systemName: "arrow.up.right.square")
                     }
-                    .buttonStyle(.plain)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(track.name).lineLimit(1)
-                        Text(track.artist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                    }
-                    Spacer()
-                    if let storeURL = track.storeURL {
-                        Link("View in iTunes", destination: storeURL)
-                            .font(.caption)
-                    }
+                    .accessibilityLabel("View in iTunes")
                 }
-                Text("Preview provided courtesy of iTunes")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else if let error = songPreview.errorMessage {
-                Text(error).font(.caption).foregroundStyle(.red)
+                Button {
+                    isSongSheetPresented = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .accessibilityLabel("Choose another song")
             }
+        } else {
+            Button {
+                isSongSheetPresented = true
+            } label: {
+                Label("Choose a song", systemImage: "music.note.list")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
         }
     }
 
@@ -235,22 +226,34 @@ struct ContentView: View {
                 ContentUnavailableView("Waiting for a frame", systemImage: source == .camera ? "camera" : "film")
                     .foregroundStyle(.white)
             }
+
+            VStack {
+                Spacer()
+                performanceOverlay
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+            }
         }
         .clipped()
     }
 
+    private var performanceOverlay: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 10) {
+                Text(String(format: "%.1f FPS", processor.throughputFPS))
+                Text(String(format: "%.1f ms total", processor.pipelineLatencyMS))
+            }
+            Text(String(format: "%d² · %.1f ms Core ML", processor.inputSize, processor.modelLatencyMS))
+        }
+        .font(.caption.monospacedDigit())
+        .foregroundStyle(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(.black.opacity(0.62), in: RoundedRectangle(cornerRadius: 10))
+    }
+
     private var statusPanel: some View {
         VStack(spacing: 12) {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 18) {
-                    metrics
-                }
-                VStack(spacing: 4) {
-                    metrics
-                }
-            }
-            .font(.callout.monospacedDigit())
-
             if source == .video {
                 if playback.hasVideo {
                     Button(playback.isPlaying ? "Pause" : "Play") {
@@ -275,11 +278,95 @@ struct ContentView: View {
     }
 
     @ViewBuilder
-    private var metrics: some View {
-        Label(String(format: "%.1f ms pipeline", processor.pipelineLatencyMS), systemImage: "gauge.with.dots.needle.67percent")
-        Label(String(format: "%.1f FPS", processor.throughputFPS), systemImage: "speedometer")
-        Text(String(format: "%d² · Core ML %.1f ms", processor.inputSize, processor.modelLatencyMS))
-            .foregroundStyle(.secondary)
+    private var songSearchSheet: some View {
+        #if os(macOS)
+        songSearchContent
+            .frame(minWidth: 440, minHeight: 500)
+        #else
+        songSearchContent
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        #endif
+    }
+
+    private var songSearchContent: some View {
+        NavigationStack {
+            VStack(spacing: 12) {
+                HStack {
+                    TextField("Song or artist", text: $songPreview.query)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($isSongSearchFocused)
+                        .onSubmit { songPreview.search() }
+                    Button {
+                        songPreview.search()
+                    } label: {
+                        if songPreview.isSearching {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Label("Search", systemImage: "magnifyingglass")
+                        }
+                    }
+                    .disabled(songPreview.isSearching)
+                }
+                .padding(.horizontal)
+
+                if songPreview.results.isEmpty {
+                    if songPreview.isSearching {
+                        Spacer()
+                        ProgressView("Finding songs…")
+                        Spacer()
+                    } else if let error = songPreview.errorMessage {
+                        ContentUnavailableView(
+                            "Search failed",
+                            systemImage: "exclamationmark.magnifyingglass",
+                            description: Text(error)
+                        )
+                    } else {
+                        ContentUnavailableView(
+                            "Find a song",
+                            systemImage: "music.note.list",
+                            description: Text("Search iTunes and choose from up to 10 preview tracks.")
+                        )
+                    }
+                } else {
+                    List(songPreview.results) { result in
+                        Button {
+                            songPreview.selectTrack(id: result.id)
+                            isSongSheetPresented = false
+                        } label: {
+                            HStack(spacing: 10) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(result.name).lineLimit(1)
+                                    Text(result.artist)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                                Spacer()
+                                if songPreview.selectedTrackID == result.id {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .listStyle(.plain)
+                }
+
+                Text("Preview provided courtesy of iTunes")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top)
+            .navigationTitle("Choose a Song")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { isSongSheetPresented = false }
+                }
+            }
+            .onAppear { isSongSearchFocused = true }
+        }
     }
 
     private func select(_ input: InputSource) {

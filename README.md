@@ -6,9 +6,9 @@ On iPhone and iPad, the cartoon preview uses the full available width in portrai
 
 Tap the **Video** segment to choose a clip directly: iPhone and iPad open the system Photos picker, while macOS opens a Finder file chooser. Selected videos play muted, loop automatically, and can be replaced by tapping the segment again.
 
-Enter a song or artist in the preview search field to retrieve up to 10 previewable results from Apple's iTunes Search API. Choose a result from the menu to stream its preview on a loop. The app shows the selected title and artist, provides play/pause and a store link, and does not download or save preview audio.
+Tap **Choose a song** to open a dedicated search sheet and retrieve up to 10 previewable results from Apple's iTunes Search API. Choosing a result closes the sheet and streams its preview on a loop. The compact now-playing row shows the selected title and artist, provides play/pause and a store link, and does not download or save preview audio.
 
-The optional **Person on green screen** toggle first runs Apple's on-device Vision person-segmentation model, composites the detected person over pure green, and feeds that result to White-box Cartoonization. The UI reports both total pipeline latency and Core ML model latency so the segmentation cost is visible on each device.
+The optional **Person on green screen** toggle first runs Apple's on-device Vision person-segmentation model, composites the detected person over pure green, and feeds that result to White-box Cartoonization. A translucent overlay on the live preview reports output FPS, total pipeline latency, resolution, and Core ML model latency so the segmentation cost remains visible without taking space from the canvas.
 
 ## Examples
 
