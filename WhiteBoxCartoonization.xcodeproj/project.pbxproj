@@ -246,7 +246,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "White Box";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Cartoonize the live camera entirely on this device.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a video to cartoonize entirely on this device.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose videos and background photos to cartoonize entirely on this device.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -333,7 +333,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "White Box";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Cartoonize the live camera entirely on this device.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a video to cartoonize entirely on this device.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose videos and background photos to cartoonize entirely on this device.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

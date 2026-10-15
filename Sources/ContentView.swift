@@ -16,6 +16,7 @@ struct ContentView: View {
     @StateObject private var songPreview = SongPreviewPlayer()
     @State private var source = InputSource.camera
     @State private var pickedItem: PhotosPickerItem?
+    @State private var backgroundPickedItem: PhotosPickerItem?
     @State private var isVideoPickerPresented = false
     @State private var isSongPickerPresented = false
     @State private var isVideoDropTargeted = false
@@ -47,6 +48,18 @@ struct ContentView: View {
                 do {
                     guard let movie = try await item.loadTransferable(type: PickedMovie.self) else { return }
                     playback.load(url: movie.url)
+                } catch {
+                    processor.errorMessage = error.localizedDescription
+                }
+            }
+        }
+        .onChange(of: backgroundPickedItem) { _, item in
+            guard let item else { return }
+            Task {
+                do {
+                    guard let data = try await item.loadTransferable(type: Data.self) else { return }
+                    processor.usesPersonSegmentation = true
+                    processor.setBackgroundPhoto(data)
                 } catch {
                     processor.errorMessage = error.localizedDescription
                 }
@@ -167,12 +180,16 @@ struct ContentView: View {
 
             Toggle(isOn: $processor.usesPersonSegmentation) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Person on green screen")
-                    Text("Apple Vision segmentation runs before cartoonization")
+                    Text("Replace person background")
+                    Text(processor.backgroundImage == nil
+                         ? "Uses green when no background photo is selected"
+                         : "Uses the selected cartoonized photo")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
+
+            backgroundPhotoControl
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -194,6 +211,68 @@ struct ContentView: View {
             songControl
         }
         .frame(maxWidth: 420)
+    }
+
+    private var backgroundPhotoControl: some View {
+        let hasBackgroundPhoto = processor.backgroundImage != nil
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                if let backgroundImage = processor.backgroundImage {
+                    Image(decorative: backgroundImage, scale: 1)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 54, height: 54)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                } else {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.green)
+                        .frame(width: 54, height: 54)
+                        .overlay {
+                            Image(systemName: "person.crop.rectangle")
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(processor.backgroundImage == nil ? "Green background" : "Photo background")
+                        .font(.subheadline.weight(.medium))
+                    Text(processor.isBackgroundProcessing
+                         ? "Cartoonizing photo…"
+                         : "Processed entirely on this device")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                if processor.isBackgroundProcessing {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
+
+            HStack {
+                PhotosPicker(selection: $backgroundPickedItem, matching: .images) {
+                    Label(
+                        hasBackgroundPhoto ? "Change background photo" : "Choose background photo",
+                        systemImage: "photo.on.rectangle"
+                    )
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                if backgroundPickedItem != nil || processor.backgroundImage != nil {
+                    Button(role: .destructive) {
+                        backgroundPickedItem = nil
+                        processor.clearBackgroundPhoto()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel("Remove background photo")
+                }
+            }
+        }
     }
 
     @ViewBuilder

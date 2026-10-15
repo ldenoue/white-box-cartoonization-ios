@@ -36,17 +36,50 @@ final class Cartoonizer: @unchecked Sendable {
         _ source: CVPixelBuffer,
         sourceTransform: CGAffineTransform,
         inputBlurRadius: Double,
-        applyingPersonSegmentation: Bool
+        applyingPersonSegmentation: Bool,
+        backgroundImage: CGImage?
+    ) throws -> Result {
+        let sourceImage = CIImage(cvPixelBuffer: source).transformed(by: sourceTransform)
+        return try predict(
+            sourceImage,
+            inputBlurRadius: inputBlurRadius,
+            applyingPersonSegmentation: applyingPersonSegmentation,
+            backgroundImage: backgroundImage
+        )
+    }
+
+    func predict(photoData: Data) throws -> Result {
+        guard let sourceImage = CIImage(
+            data: photoData,
+            options: [.applyOrientationProperty: true]
+        ) else {
+            throw CocoaError(.fileReadCorruptFile, userInfo: [
+                NSLocalizedDescriptionKey: "The selected background photo could not be opened."
+            ])
+        }
+        return try predict(
+            sourceImage,
+            inputBlurRadius: 0,
+            applyingPersonSegmentation: false,
+            backgroundImage: nil
+        )
+    }
+
+    private func predict(
+        _ inputImage: CIImage,
+        inputBlurRadius: Double,
+        applyingPersonSegmentation: Bool,
+        backgroundImage: CGImage?
     ) throws -> Result {
         let pipelineStarted = ContinuousClock.now
-        var sourceImage = CIImage(cvPixelBuffer: source).transformed(by: sourceTransform)
-        let transformedExtent = sourceImage.extent
+        let transformedExtent = inputImage.extent
+        var sourceImage = inputImage
         sourceImage = sourceImage.transformed(by: CGAffineTransform(
             translationX: -transformedExtent.minX,
             y: -transformedExtent.minY
         ))
         if applyingPersonSegmentation {
-            sourceImage = try greenScreenedPerson(from: sourceImage)
+            sourceImage = try personComposited(from: sourceImage, over: backgroundImage)
         }
         let extent = sourceImage.extent
         let side = min(extent.width, extent.height)
@@ -89,7 +122,7 @@ final class Cartoonizer: @unchecked Sendable {
         )
     }
 
-    private func greenScreenedPerson(from sourceImage: CIImage) throws -> CIImage {
+    private func personComposited(from sourceImage: CIImage, over backgroundImage: CGImage?) throws -> CIImage {
         let handler = VNImageRequestHandler(ciImage: sourceImage, options: [:])
         try handler.perform([personSegmentationRequest])
         guard let maskBuffer = personSegmentationRequest.results?.first?.pixelBuffer else {
@@ -102,11 +135,26 @@ final class Cartoonizer: @unchecked Sendable {
             scaleX: extent.width / rawMask.extent.width,
             y: extent.height / rawMask.extent.height
         ))
-        let green = CIImage(color: CIColor(red: 0, green: 1, blue: 0)).cropped(to: extent)
+        let background: CIImage
+        if let backgroundImage {
+            background = aspectFill(CIImage(cgImage: backgroundImage), to: extent)
+        } else {
+            background = CIImage(color: CIColor(red: 0, green: 1, blue: 0)).cropped(to: extent)
+        }
         return sourceImage.applyingFilter("CIBlendWithMask", parameters: [
-            kCIInputBackgroundImageKey: green,
+            kCIInputBackgroundImageKey: background,
             kCIInputMaskImageKey: mask
         ])
+    }
+
+    private func aspectFill(_ image: CIImage, to extent: CGRect) -> CIImage {
+        let scale = max(extent.width / image.extent.width, extent.height / image.extent.height)
+        let scaled = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        let translation = CGAffineTransform(
+            translationX: extent.midX - scaled.extent.midX,
+            y: extent.midY - scaled.extent.midY
+        )
+        return scaled.transformed(by: translation).cropped(to: extent)
     }
 
     private static func makePixelBuffer(size: Int) throws -> CVPixelBuffer {
